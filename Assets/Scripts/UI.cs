@@ -62,8 +62,8 @@ public class UI : MonoBehaviour {
             timeUp.SetActive(true);
             win_UI.text = winTextOptions[outcome];
             print("disable");
-            if(counting == 1) {
-                p1ScoreText.text = p1Score;
+            if(counting) {
+                p1ScoreText.text = p1Score.ToString();
 
             }
             else {
