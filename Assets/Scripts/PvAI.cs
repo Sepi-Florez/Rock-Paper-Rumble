@@ -5,37 +5,42 @@ using System.Collections.Generic;
 
 public class PvAI : MonoBehaviour {
 	public Text countDown;
-	public Text timeUp;
-    public Text winText;
-    public string[] winTextOptions;
+
 
     public float timeLeft; 
 	public float timeCount;
 	public float waitTime = 1F;
 	public bool counting = false;
     
-    public enum Choice {Rock, Paper, Scissors};
+    public enum Choice {Rock, Paper, Scissors, Null};
     public Choice playerChoice;
     public Choice aiChoice;
 
-    public int player1Score;
-    public int player2Score;
+    public string player1_Name;
+    public string player2_Name;
+    public Text[] playerNames;
+
+    private UI scriptUI;
 
     void Start () {
-        winText.gameObject.SetActive(false);
+        scriptUI = transform.GetComponent<UI>();
 		timeLeft = timeCount;
 		countDown.text = timeLeft.ToString("0");
-	}
+        playerNames[0].text = player1_Name;
+        playerNames[1].text = player2_Name;
+
+    }
 	
 	void Update () {
-		if(Input.GetButtonDown("Jump")&& counting == false){	
-			StartCoroutine(Timer());
-			timeUp.gameObject.SetActive(false);
-			timeLeft = timeCount;
-			countDown.text = timeLeft.ToString("F0");
-			counting = true;
+		if(Input.GetButtonDown("Jump")&& counting == false){
+            scriptUI.counting = true;
+            scriptUI.Outcome(0);
+            timeLeft = timeCount;
+            scriptUI.TimeChange(timeLeft.ToString("0f"));
+            StartCoroutine(Timer());
+            counting = true;
+            playerChoice = (Choice)3;
             AIPick();
-            UI(0);
 		}
         else if(counting == true) { 
             Pick();
@@ -44,10 +49,11 @@ public class PvAI : MonoBehaviour {
     IEnumerator Timer() {
         yield return new WaitForSeconds(waitTime);
         timeLeft -= 1;
-        countDown.text = timeLeft.ToString("F0");
+        scriptUI.TimeChange(timeLeft.ToString("F0"));
         if (timeLeft <= 0) {
             counting = false;
             WinCheck();
+            scriptUI.ChoiceAI((int)aiChoice);
             StopCoroutine(Timer());
         }
         else {
@@ -76,35 +82,33 @@ public class PvAI : MonoBehaviour {
         aiChoice = (Choice)Random.Range(0, 3);
     }
     void WinCheck () {
+        
         if(playerChoice == aiChoice) {
-            UI(0);
+            scriptUI.Outcome(0);
+            scriptUI.ChoiceP((int)aiChoice);
         }
         else {
             switch (playerChoice) {
                 case (Choice)0:
-                    UI(Check0());
+                    scriptUI.Outcome(Check0());
+                    scriptUI.ChoiceP(0);
                     break;
                 case (Choice)1:
-                    UI(Check1());
+                    scriptUI.Outcome(Check1());
+                    scriptUI.ChoiceP(1);
                     break;
                 case (Choice)2:
-                    UI(Check2());
+                    scriptUI.Outcome(Check2());
+                    scriptUI.ChoiceP(2);
+                    break;
+                case (Choice)3:
+                    scriptUI.Outcome(2);
+                    scriptUI.ChoiceP(3);
                     break;
             }
         }
     }
-    void UI (int outcome) {
-        print("ui change");
-        if(counting == false) {
-            timeUp.gameObject.SetActive(true);
-            winText.gameObject.SetActive(true);
-            winText.text = winTextOptions[outcome];
-        }
-        else {
-            timeUp.gameObject.SetActive(false);
-            winText.gameObject.SetActive(false);
-        }
-    }
+    
     int Check0 () {
         if(aiChoice == (Choice)2) {
             return 1;
